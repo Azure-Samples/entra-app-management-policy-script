@@ -163,24 +163,36 @@ If there are any policies returned from that request, you should run this script
 There are 2 modes to run the script
 
 ### What-If mode ON
-This runs the scripts and logs all application management policies but doesn't update the policies in Entra ID
+This runs the scripts and logs all current application management policies, along with what the policies would be updated to, but doesn't actually update the policies in Entra ID
 
-Command: `./UpdateAppManagementPolicies.ps1 -WhatIf $true`
+Command:
+
+```PowerShell
+./UpdateAppManagementPolicies.ps1 -WhatIf $true
+```
 
 ### What-If mode OFF
 This runs the scripts, logs all application management policies and also updates the policies in Entra ID
 
-Command: `./UpdateAppManagementPolicies.ps1 -WhatIf $false`
+Command:
+
+```PowerShell
+./UpdateAppManagementPolicies.ps1 -WhatIf $false
+``` 
 
 ## Support for Non-Public clouds
 The script supports non-public clouds via the -Environment variable similar to [Connect-MgGraph -Environment <ENV_NAME>](https://learn.microsoft.com/en-us/powershell/module/microsoft.graph.authentication/connect-mggraph?view=graph-powershell-1.0&viewFallbackFrom=graph-powershell-beta#-environment)
 
-e.g. `./UpdateAppManagementPolicies.ps1 -Environment USGov -WhatIf $true`
+```PowerShell
+./UpdateAppManagementPolicies.ps1 -Environment USGov -WhatIf $true
+```
 
 ## Support for specific TenantId
 The script supports login to a specifc tenant via the -TenantId variable similar to [Connect-MgGraph -Tenant <TenantId>](https://learn.microsoft.com/en-us/powershell/module/microsoft.graph.authentication/connect-mggraph?view=graph-powershell-1.0&viewFallbackFrom=graph-powershell-beta#-tenantid)
 
-e.g. `./UpdateAppManagementPolicies.ps1 -TenantId <YOUR_TENANT_ID> -WhatIf $true`
+```PowerShell
+./UpdateAppManagementPolicies.ps1 -TenantId <YOUR_TENANT_ID> -WhatIf $true
+```
 
 ## Credentials
 When prompted, login with the user identity with `Global Administrator` or `Application Administrator` role assignment in the target tenant.
