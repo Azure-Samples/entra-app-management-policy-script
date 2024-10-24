@@ -1,11 +1,13 @@
 # Introduction
-This PowerShell script [UpdateAppManagementPolicies](.\UpdateAppManagementPolicies.ps1) is intended to update application management policies in Entra ID in preparation of a change in behavior that will come into effect mid-October 2024.
+This PowerShell script [UpdateAppManagementPolicies](#running-the-script) is intended to update application management policies in Entra ID in preparation of a change in behavior that will come into effect early December 2024.
+
+If you just want to learn how to run the script, jump to [that section](#running-the-script).
 
 # Background
 
-[App management policies](https://learn.microsoft.com/en-us/graph/api/resources/applicationauthenticationmethodpolicy?view=graph-rest-1.0) allow you, as an administrator of a tenant, to set rules about how applications in your tenant can be configured.  For example, you can block the addition of password credentials, or set a max lifetime on certificate credentials:
+[App management policies](https://learn.microsoft.com/en-us/graph/api/resources/applicationauthenticationmethodpolicy) allow you, as an administrator of a tenant, to set rules about how applications in your tenant can be configured.  For example, you can block the addition of password credentials, or set a max lifetime on certificate credentials:
 
-```json
+```http
 /policies/defaultAppManagementPolicy
 
 {
@@ -40,7 +42,7 @@ Typically, you'll do this by configuring the [tenant default policy](https://lea
 
 You can also use [custom app management policies](https://learn.microsoft.com/en-us/graph/api/resources/appmanagementpolicy?view=graph-rest-1.0) to configure custom policies.  When a custom app management policy is applied to an application or service principal, it fully overrides the tenant default policy - meaning no aspect of the tenant default policy applies to the app, and custom app management policies do not inherit from the default policy.  For example, if your tenant had the default policy defined above, and then you applied the below custom policy to an app:
 
-```json
+```http
 /policies/appManagementPolicies/db9d4b58-3488-4da4-9994-49773c454e33
 
 {
@@ -63,12 +65,12 @@ You can also use [custom app management policies](https://learn.microsoft.com/en
 
 then that application would **only** have the `passwordLifetime` restriction applied to it.  The `passwordAddition` and `keyLifetime` restrictions would not apply - meaning the application would still be able to add passwords, and add certificate credentials with any lifetime.
 
-However, a change is coming to this functionality.  Starting in mid-October 2024, custom policies that don't explicitly define a restriction will inherit the behavior defined in the tenant default policy.  **If you have defined a custom app managemement policy before October of 2024, you need to take action to ensure your policies continue to work as expected**.  Keep reading for more information on this behavior update to the app management policies. 
+However, a change is coming to this functionality.  Starting in early December 2024, custom policies that don't explicitly define a restriction will inherit the behavior defined in the tenant default policy.  **If you have defined a custom app managemement policy before November of 2024, you need to take action to ensure your policies continue to work as expected**.  Keep reading for more information on this behavior update to the app management policies. 
 
 # Behavior update
 We have introduced a new property, `state`, on the restriction type, with possible values `enabled`, `disabled`.
 
-```json
+```http
 {
   ...
   "restrictions": {
@@ -88,11 +90,11 @@ We have introduced a new property, `state`, on the restriction type, with possib
 
 If the `state` of a restriction is `enabled`, the restriction will be evaluated and enforced, else if the `state` is `disabled` the restriction will not be evaluated or enforced.  This property is already available to set in the `beta` version of the [Application Management Policies API](https://learn.microsoft.com/en-us/graph/api/resources/passwordcredentialconfiguration?view=graph-rest-beta#properties).
 
-Starting in mid-October 2024, only restrictions that are explicitly defined on the custom app management policy will override the tenant default policy.  You can leverage the `state` flag on the custom policy to turn the restriction on or off explicitly - otherwise, don't specify anything to fall back to the tenant default behavior.
+Starting in early December 2024, only restrictions that are explicitly defined on the custom app management policy will override the tenant default policy.  You can leverage the `state` flag on the custom policy to turn the restriction on or off explicitly - otherwise, don't specify anything to fall back to the tenant default behavior.
 
 For example, say your tenant had a default policy like the one defined in the 'background' section - where both password addition and key lifetime restrictions were set.  If you wanted a custom app managemnt policy that would only give an exception to the password addition restriciton, you could create the following policy:
 
-```json
+```http
 /policies/appManagementPolicies/{id}
 
 {
@@ -123,12 +125,12 @@ This will improve policy exception handling and reduce policy management complex
 
 Your existing policies will need to be updated before this feature is enabled, or they will start working unexpectedly.  This is because, previously, exceptions to restrictions in the tenant default policy were indicated by a *lack* of the restriction in the custom app management policy; once this feature is enabled, those same exceptions will be granted through a *disabled* restriction.
 
-The Entra ID team has created a PowerShell script that will apply the needed updates to your application policies. **The only action required from you is to [run the script](#running-the-script) before October 18, 2024.**
+The Entra ID team has created a PowerShell script that will apply the needed updates to your application policies. **The only action required from you is to [run the script](#running-the-script) before December 4, 2024.**
 
 The script scans the tenant for tenant-wide and custom application management policies and sets the `state` property as `enabled` where the restrictions are already defined and state is not yet set. Additionally the script adds new restrictions on all app specific policies that are missing in the app specific policy but defined on the tenant wide policy, but sets the `state` for these new restrictions as `disabled`
 
 # How do I know if I need to run the script?
-This script only needs to be run if the tenant has custom app management policies that were created on or before October 18, 2024.
+This script only needs to be run if the tenant has any custom app management policies that were created on or before November 4, 2024.
 
 If you are not sure if this applies to you, check for the presence of app management policies in your tenant.  You can do this by signing into [MS Graph explorer](https://aka.ms/ge) and making the following request:
 
@@ -140,10 +142,22 @@ If there are any policies returned from that request, you should run this script
 
 # Running the script
 
-## Prerequisites
-- The tenant needs to have 'Workload Identity' license subscription to manage application management policies
+## Prerequisites and setup
 - The user identity running the PowerShell script has the `Global Administrator` or `Application Administrator` role assignment.
-- You need to have the [Microsoft Graph SDK](https://learn.microsoft.com/en-us/graph/sdks/sdks-overview) installed.
+- You need to have the [Microsoft Graph Powershell SDK](https://learn.microsoft.com/en-us/graph/sdks/sdk-installation#install-the-microsoft-graph-powershell-sdk) installed.  If you don't, from a Powershell window, run 
+
+  ```PowerShell
+  Install-Module Microsoft.Graph
+  ```
+
+- To run the command that executes this script, you first need to:
+  1. Download this repo's files as a ZIP to your local machine
+       ![Screenshot of download zip button](media/screenshot-of-download-zip-button.png)
+  1. Extract them to whatever location you prefer (e.g., "C:\Users\myUserAccount")
+  1. Open a Powershell window, and navigate to this folder.
+      ```PowerShell
+      cd "C:\Users\myUserAccount\entra-app-management-policy-script"
+      ```
 
 ## How-to?
 There are 2 modes to run the script
@@ -151,22 +165,22 @@ There are 2 modes to run the script
 ### What-If mode ON
 This runs the scripts and logs all application management policies but doesn't update the policies in Entra ID
 
-Command: `UpdateAppManagementPolicies.ps1 -WhatIf $true`
+Command: `./UpdateAppManagementPolicies.ps1 -WhatIf $true`
 
 ### What-If mode OFF
 This runs the scripts, logs all application management policies and also updates the policies in Entra ID
 
-Command: `UpdateAppManagementPolicies.ps1 -WhatIf $false`
+Command: `./UpdateAppManagementPolicies.ps1 -WhatIf $false`
 
 ## Support for Non-Public clouds
 The script supports non-public clouds via the -Environment variable similar to [Connect-MgGraph -Environment <ENV_NAME>](https://learn.microsoft.com/en-us/powershell/module/microsoft.graph.authentication/connect-mggraph?view=graph-powershell-1.0&viewFallbackFrom=graph-powershell-beta#-environment)
 
-e.g. `UpdateAppManagementPolicies.ps1 -Environment USGov -WhatIf $true`
+e.g. `./UpdateAppManagementPolicies.ps1 -Environment USGov -WhatIf $true`
 
 ## Support for specific TenantId
 The script supports login to a specifc tenant via the -TenantId variable similar to [Connect-MgGraph -Tenant <TenantId>](https://learn.microsoft.com/en-us/powershell/module/microsoft.graph.authentication/connect-mggraph?view=graph-powershell-1.0&viewFallbackFrom=graph-powershell-beta#-tenantid)
 
-e.g. `UpdateAppManagementPolicies.ps1 -TenantId <YOUR_TENANT_ID> -WhatIf $true`
+e.g. `./UpdateAppManagementPolicies.ps1 -TenantId <YOUR_TENANT_ID> -WhatIf $true`
 
 ## Credentials
 When prompted, login with the user identity with `Global Administrator` or `Application Administrator` role assignment in the target tenant.
@@ -175,11 +189,11 @@ When prompted, login with the user identity with `Global Administrator` or `Appl
 
 ### What happens if I don't run the script?
 
-Your application policies will start working unexpectedly after mid-October 2024.  Specifically, applications that previously had been granted exceptions to your tenant default policy restrictions will no longer have those exceptions.
+Your application policies will start working unexpectedly after early December 2024.  Specifically, applications that previously had been granted exceptions to your tenant default policy restrictions will no longer have those exceptions.
 
 ### Will running the script cause any change in behavior now?
 
-No, there will be no change in current behavior of the policies.  This change simply ensures your policies continue to work as expected after mid-October 2024.
+No, there will be no change in current behavior of the policies.  This change simply ensures your policies continue to work as expected after early December 2024.
 
 ###  Can I run the script multiple times?
 
