@@ -150,7 +150,7 @@ If there are any policies returned from that request, you should run this script
   Install-Module Microsoft.Graph
   ```
 
-- To run the command that executes this script, you first need to:
+- To run the command that executes this script, you need to get the files in this repo onto your local machine.  To do this, you can clone the repo locally.  Or, you can download and extract the files:
   1. Download this repo's files as a ZIP to your local machine
        ![Screenshot of download zip button](media/screenshot-of-download-zip-button.png)
   1. Extract them to whatever location you prefer (e.g., "C:\Users\myUserAccount")
@@ -160,7 +160,7 @@ If there are any policies returned from that request, you should run this script
       ```
 
 ## How-to?
-There are 2 modes to run the script
+There are 2 modes to run the script.  We recommend first running with What-If mode ON.  Then, run with What-If mode OFF to actually apply the policy updates.
 
 ### What-If mode ON
 This runs the scripts and logs all current application management policies, along with what the policies would be updated to, but doesn't actually update the policies in Entra ID
