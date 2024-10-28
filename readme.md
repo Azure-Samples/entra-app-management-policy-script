@@ -147,7 +147,7 @@ If there are any policies returned from that request, you should run this script
 - You need to have the [Microsoft Graph Powershell SDK](https://learn.microsoft.com/en-us/graph/sdks/sdk-installation#install-the-microsoft-graph-powershell-sdk) installed.  If you don't, from a Powershell window, run 
 
   ```PowerShell
-  Install-Module Microsoft.Graph
+  Install-Module Microsoft.Graph -Scope CurrentUser
   ```
 
 - To run the command that executes this script, you need to get the files in this repo onto your local machine.  To do this, you can clone the repo locally.  Or, you can download and extract the files:
@@ -160,7 +160,11 @@ If there are any policies returned from that request, you should run this script
       ```
 
 ## How-to?
-There are 2 modes to run the script.  We recommend first running with What-If mode ON.  Then, run with What-If mode OFF to actually apply the policy updates.
+There are 2 modes to run the script.  We recommend first running with What-If mode ON.  Then, run with What-If mode OFF to actually apply the policy updates
+
+Note: if you get an error message like `File cannot be loaded. The file
+<fileName> is not digitally signed. You
+cannot run this script on the current system`, jump to [the FAQ](#faq).
 
 ### What-If mode ON
 This runs the scripts and logs all current application management policies, along with what the policies would be updated to, but doesn't actually update the policies in Entra ID
@@ -198,6 +202,14 @@ The script supports login to a specifc tenant via the -TenantId variable similar
 When prompted, login with the user identity with `Global Administrator` or `Application Administrator` role assignment in the target tenant.
 
 ## FAQ
+
+### When I try to run the script, I get an error like "The file is not digitally signed. You cannot run this script on the current system"
+
+This is happening because of Powershell execution policies on your machine.  To override them temporarily (just for the current session), run:
+
+```PowerShell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted
+```
 
 ### What happens if I don't run the script?
 
