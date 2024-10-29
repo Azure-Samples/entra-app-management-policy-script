@@ -211,6 +211,12 @@ This is happening because of Powershell execution policies on your machine.  To 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted
 ```
 
+### Your docs say that this 'inheritance' feature has already been turned on, but it's not December 4 yet.  What gives?
+
+Yes, our [documentation](todo) describes tenant-wide policies and custom app policies as working how they will once this feature is enabled - where restrictions not defined in the custom policy inherit the behavior of the tenant default policy.
+
+This is because, in early November 2024, this inheritance behavior was enabled for all tenants (a.k.a. organizations) **except** those who had custom policies already defined.  For tenants with existing custom policies already defined, this behavior will be enabled in early December 2024 (to give those tenants time to run this script).
+
 ### What happens if I don't run the script?
 
 Your application policies will start working unexpectedly after early December 2024.  Specifically, applications that previously had been granted exceptions to your tenant default policy restrictions will no longer have those exceptions.
