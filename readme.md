@@ -144,6 +144,7 @@ If there are any policies returned from that request, you should run this script
 
 ## Prerequisites and setup
 - The user identity running the PowerShell script has the `Global Administrator` or `Application Administrator` role assignment.
+- [Powershell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4), also referred to as just 'PowerShell' or 'Powershell Core', installed on your machine.  Don't use Windows PowerShell (also referred to as PowerShell 5.1).
 - You need to have the [Microsoft Graph Powershell SDK](https://learn.microsoft.com/en-us/graph/sdks/sdk-installation#install-the-microsoft-graph-powershell-sdk) installed.  If you don't, from a Powershell window, run 
 
   ```PowerShell
@@ -154,7 +155,7 @@ If there are any policies returned from that request, you should run this script
   1. Download this repo's files as a ZIP to your local machine
        ![Screenshot of download zip button](media/screenshot-of-download-zip-button.png)
   1. Extract them to whatever location you prefer (e.g., "C:\Users\myUserAccount")
-  1. Open a Powershell window, and navigate to this folder.
+  1. Open a Powershell 7 window, and navigate to this folder.
       ```PowerShell
       cd "C:\Users\myUserAccount\entra-app-management-policy-script"
       ```
